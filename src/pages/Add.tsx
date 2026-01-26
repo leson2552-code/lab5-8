@@ -6,7 +6,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 
-/* ================= VALIDATE ================= */
 
 const courseSchema = z.object({
   name: z.string().min(3, "Tên ít nhất 3 ký tự").max(100),
@@ -17,7 +16,6 @@ const courseSchema = z.object({
 
 type FormValues = z.infer<typeof courseSchema>;
 
-/* ================= COMPONENT ================= */
 
 function AddEditPage() {
   const { id } = useParams();
@@ -32,7 +30,6 @@ function AddEditPage() {
     resolver: zodResolver(courseSchema),
   });
 
-  /* ====== GET DETAIL WHEN EDIT ====== */
   useEffect(() => {
     if (!id) return;
 
@@ -51,7 +48,6 @@ function AddEditPage() {
     getDetail();
   }, [id]);
 
-  /* ====== SUBMIT ====== */
   const onSubmit = async (values: FormValues) => {
     try {
       if (id) {
@@ -86,7 +82,6 @@ function AddEditPage() {
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-5"
       >
-        {/* NAME */}
         <div>
           <label className="block mb-1 font-medium">
             Tên khóa học
@@ -101,7 +96,6 @@ function AddEditPage() {
           </p>
         </div>
 
-        {/* CREDIT */}
         <div>
           <label className="block mb-1 font-medium">
             Số tín chỉ
@@ -116,7 +110,6 @@ function AddEditPage() {
           </p>
         </div>
 
-        {/* CATEGORY */}
         <div>
           <label className="block mb-1 font-medium">
             Danh mục
@@ -141,7 +134,6 @@ function AddEditPage() {
           </p>
         </div>
 
-        {/* TEACHER */}
         <div>
           <label className="block mb-1 font-medium">
             Giảng viên
@@ -156,7 +148,6 @@ function AddEditPage() {
           </p>
         </div>
 
-        {/* BUTTON */}
         <button
           type="submit"
           disabled={isSubmitting}
