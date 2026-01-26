@@ -1,119 +1,105 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 
-type FormData = {
+type FormValues = {
   name: string;
   credit: number;
-  category: string;
-  teacher: string;
 };
 
-function AddPage() {
-  const navigate = useNavigate();
+const validate = z.object({
+  name: z.string().min(3, "Name 3 ky tu").max(100),
+  credit: z.number().min(1).max(100),
+});
 
+function AddPage() {
+  const { id } = useParams(); // params: {id: '1'}
+  const nav = useNavigate();
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm({
+    resolver: zodResolver(validate),
+  });
 
-  const onSubmit = async (values: FormData) => {
+  // get data theo id
+  useEffect(() => {
+    const getDetail = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:3000/courses/${id}`);
+        reset(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (id) {
+      getDetail();
+    }
+  }, [id]);
+
+  const onSubmit = async (values: FormValues) => {
     try {
-      await axios.post("http://localhost:3000/courses", values);
-      toast.success("Thêm khóa học thành công!");
-      navigate("/courses"); 
+      if (id) {
+        // edit
+        await axios.put(`http://localhost:3000/courses/${id}`, values);
+      } else {
+        // add
+        await axios.post("http://localhost:3000/courses", values);
+      }
+      toast.success("Thành công");
+      nav("/list");
     } catch (error) {
-      toast.error("Thêm thất bại!");
       console.log(error);
+      toast.error("Thất bại: " + (error as AxiosError).message);
     }
   };
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-6">Thêm khóa học</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-semibold mb-6">Thêm mới</h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Text input */}
         <div>
-          <label className="block font-medium mb-1">Tên khóa học</label>
+          <label htmlFor="text" className="block font-medium mb-1">
+            Text
+          </label>
           <input
-            {...register("name", {
-              required: "Tên khóa học bắt buộc",
-              minLength: {
-                value: 3,
-                message: "Tối thiểu 3 ký tự",
-              },
-            })}
-            className="w-full border rounded-lg px-3 py-2"
+            {...register("name")}
+            type="text"
+            id="text"
+            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.name && (
-            <p className="text-red-500 text-sm">{errors.name.message}</p>
-          )}
+          <span>{errors?.name?.message}</span>
         </div>
 
+        {/* Select */}
         <div>
-          <label className="block font-medium mb-1">Số tín chỉ</label>
-          <input
-            type="number"
-            {...register("credit", {
-              required: "Số tín chỉ bắt buộc",
-              min: {
-                value: 1,
-                message: "Số tín chỉ phải > 0",
-              },
-            })}
-            className="w-full border rounded-lg px-3 py-2"
-          />
-          {errors.credit && (
-            <p className="text-red-500 text-sm">{errors.credit.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1">Danh mục</label>
+          <label htmlFor="selectOption" className="block font-medium mb-1">
+            Select - option
+          </label>
           <select
-            {...register("category", {
-              required: "Vui lòng chọn danh mục",
-            })}
-            className="w-full border rounded-lg px-3 py-2 bg-white"
+            id="selectOption"
+            className="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">-- Chọn danh mục --</option>
-            <option value="Cơ sở">Cơ sở</option>
-            <option value="Chuyên ngành">Chuyên ngành</option>
-            <option value="Tự chọn">Tự chọn</option>
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
           </select>
-          {errors.category && (
-            <p className="text-red-500 text-sm">
-              {errors.category.message}
-            </p>
-          )}
         </div>
 
-        <div>
-          <label className="block font-medium mb-1">Giảng viên</label>
-          <input
-            {...register("teacher", {
-              required: "Tên giảng viên bắt buộc",
-              minLength: {
-                value: 3,
-                message: "Tối thiểu 3 ký tự",
-              },
-            })}
-            className="w-full border rounded-lg px-3 py-2"
-          />
-          {errors.teacher && (
-            <p className="text-red-500 text-sm">
-              {errors.teacher.message}
-            </p>
-          )}
-        </div>
-
+        {/* Submit button */}
         <button
           type="submit"
-          className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >
-          Thêm mới
+          Submit
         </button>
       </form>
     </div>
