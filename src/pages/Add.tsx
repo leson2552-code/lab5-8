@@ -24,37 +24,111 @@ function AddPage() {
   };
 
   return (
-    <div className="p-6 max-w-xl mx-auto border border-gray-200 rounded mt-5">
-      <h1 className="text-2xl font-bold mb-6">Thêm mới</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
-        <div>
-          <label className="block font-medium mb-1">Name</label>
-          <input {...register("name", { required: "Cần nhập tên", minLength: { value: 4, message: "> 3 ký tự" } })} type="text" className="w-full border p-2 rounded outline-none" />
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Credit</label>
-          <input {...register("credit", { required: "Cần nhập tín chỉ", valueAsNumber: true, min: { value: 1, message: "> 0" } })} type="number" className="w-full border p-2 rounded outline-none" />
-          {errors.credit && <p className="text-red-500 text-sm mt-1">{errors.credit.message}</p>}
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Teacher</label>
-          <input {...register("teacher", { required: "Cần nhập tên GV", minLength: { value: 4, message: "> 3 ký tự" } })} type="text" className="w-full border p-2 rounded outline-none" />
-          {errors.teacher && <p className="text-red-500 text-sm mt-1">{errors.teacher.message}</p>}
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Category</label>
-          <select {...register("category")} className="w-full border p-2 rounded bg-white">
-            <option value="Chuyên ngành">Chuyên ngành</option>
-            <option value="Cơ sở">Cơ sở</option>
-          </select>
-        </div>
-        <button type="submit" className="mt-4 px-6 py-2 border border-black hover:bg-gray-100 transition rounded">
-          Submit
-        </button>
-      </form>
-    </div>
-  );
+  <div className="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-xl p-8">
+    <h1 className="text-2xl font-semibold mb-6 text-center">
+      Thêm mới khóa học
+    </h1>
+
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-5"
+    >
+      <div>
+        <label className="block mb-1 font-medium">
+          Tên khóa học
+        </label>
+        <input
+          {...register("name", {
+            required: "Cần nhập tên",
+            minLength: { value: 4, message: "> 3 ký tự" },
+          })}
+          type="text"
+          className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+        {errors.name && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.name.message}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block mb-1 font-medium">
+          Số tín chỉ
+        </label>
+        <input
+          {...register("credit", {
+            required: "Cần nhập tín chỉ",
+            valueAsNumber: true,
+            min: { value: 1, message: "> 0" },
+          })}
+          type="number"
+          className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+        {errors.credit && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.credit.message}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block mb-1 font-medium">
+          Giảng viên
+        </label>
+        <input
+          {...register("teacher", {
+            required: "Cần nhập tên GV",
+            minLength: { value: 4, message: "> 3 ký tự" },
+          })}
+          type="text"
+          className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+        {errors.teacher && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.teacher.message}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block mb-1 font-medium">
+          Danh mục
+        </label>
+        <select
+          {...register("category", {
+            required: "Vui lòng chọn danh mục",
+          })}
+          className="w-full border px-3 py-2 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+        >
+          <option value="">-- Chọn danh mục --</option>
+          <option value="Chuyên ngành">
+            Chuyên ngành
+          </option>
+          <option value="Cơ sở">
+            Cơ sở
+          </option>
+          <option value="Đại cương">
+            Đại cương
+          </option>
+        </select>
+        {errors.category && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.category.message}
+          </p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+      >
+        Thêm mới
+      </button>
+    </form>
+  </div>
+);
+
 }
 
 export default AddPage;
