@@ -1,109 +1,176 @@
 import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
-import z from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 
-type FormValues = {
-  name: string;
-  credit: number;
-};
+/* ================= VALIDATE ================= */
 
-const validate = z.object({
-  name: z.string().min(3, "Name 3 ky tu").max(100),
-  credit: z.number().min(1).max(100),
+const courseSchema = z.object({
+  name: z.string().min(3, "Tên ít nhất 3 ký tự").max(100),
+  credit: z.coerce.number().min(1, "Credit > 0").max(100),
+  category: z.string().min(1, "Vui lòng chọn category"),
+  teacher: z.string().min(3, "Tên giáo viên ít nhất 3 ký tự"),
 });
 
-function AddPage() {
-  const { id } = useParams(); // params: {id: '1'}
+type FormValues = z.infer<typeof courseSchema>;
+
+/* ================= COMPONENT ================= */
+
+function AddEditPage() {
+  const { id } = useParams();
   const nav = useNavigate();
+
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(validate),
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(courseSchema),
   });
 
-  // get data theo id
+  /* ====== GET DETAIL WHEN EDIT ====== */
   useEffect(() => {
+    if (!id) return;
+
     const getDetail = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:3000/courses/${id}`);
+        const { data } = await axios.get(
+          `http://localhost:3000/courses/${id}`
+        );
         reset(data);
       } catch (error) {
-        console.log(error);
+        toast.error("Không tìm thấy dữ liệu");
+        nav("/list");
       }
     };
-    if (id) {
-      getDetail();
-    }
+
+    getDetail();
   }, [id]);
 
+  /* ====== SUBMIT ====== */
   const onSubmit = async (values: FormValues) => {
     try {
       if (id) {
-        // edit
-        await axios.put(`http://localhost:3000/courses/${id}`, values);
+        await axios.put(
+          `http://localhost:3000/courses/${id}`,
+          values
+        );
+        toast.success("Cập nhật thành công");
       } else {
-        // add
-        await axios.post("http://localhost:3000/courses", values);
+        await axios.post(
+          "http://localhost:3000/courses",
+          values
+        );
+        toast.success("Thêm mới thành công");
       }
-      toast.success("Thành công");
+
       nav("/list");
     } catch (error) {
-      console.log(error);
-      toast.error("Thất bại: " + (error as AxiosError).message);
+      toast.error(
+        "Lỗi: " + (error as AxiosError).message
+      );
     }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6">Thêm mới</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-xl">
+      <h1 className="text-2xl font-semibold mb-6">
+        {id ? "Cập nhật khóa học" : "Thêm mới khóa học"}
+      </h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Text input */}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-5"
+      >
+        {/* NAME */}
         <div>
-          <label htmlFor="text" className="block font-medium mb-1">
-            Text
+          <label className="block mb-1 font-medium">
+            Tên khóa học
           </label>
           <input
             {...register("name")}
             type="text"
-            id="text"
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border px-3 py-2 rounded-lg"
           />
-          <span>{errors?.name?.message}</span>
+          <p className="text-red-500 text-sm">
+            {errors.name?.message}
+          </p>
         </div>
 
-        {/* Select */}
+        {/* CREDIT */}
         <div>
-          <label htmlFor="selectOption" className="block font-medium mb-1">
-            Select - option
+          <label className="block mb-1 font-medium">
+            Số tín chỉ
+          </label>
+          <input
+            {...register("credit")}
+            type="number"
+            className="w-full border px-3 py-2 rounded-lg"
+          />
+          <p className="text-red-500 text-sm">
+            {errors.credit?.message}
+          </p>
+        </div>
+
+        {/* CATEGORY */}
+        <div>
+          <label className="block mb-1 font-medium">
+            Danh mục
           </label>
           <select
-            id="selectOption"
-            className="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            {...register("category")}
+            className="w-full border px-3 py-2 rounded-lg"
           >
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
+            <option value="">-- Chọn --</option>
+            <option value="Chuyên ngành">
+              Chuyên ngành
+            </option>
+            <option value="Cơ sở">
+              Cơ sở
+            </option>
+            <option value="Đại cương">
+              Đại cương
+            </option>
           </select>
+          <p className="text-red-500 text-sm">
+            {errors.category?.message}
+          </p>
         </div>
 
-        {/* Submit button */}
+        {/* TEACHER */}
+        <div>
+          <label className="block mb-1 font-medium">
+            Giảng viên
+          </label>
+          <input
+            {...register("teacher")}
+            type="text"
+            className="w-full border px-3 py-2 rounded-lg"
+          />
+          <p className="text-red-500 text-sm">
+            {errors.teacher?.message}
+          </p>
+        </div>
+
+        {/* BUTTON */}
         <button
           type="submit"
-          className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          disabled={isSubmitting}
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
-          Submit
+          {isSubmitting
+            ? "Đang xử lý..."
+            : id
+            ? "Cập nhật"
+            : "Thêm mới"}
         </button>
       </form>
     </div>
   );
 }
 
-export default AddPage;
+export default AddEditPage;

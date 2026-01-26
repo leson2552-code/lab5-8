@@ -34,6 +34,13 @@
       "category": "Cơ sở",
       "teacher": "chinhpd5",
       "id": 6
+    },
+    {
+      "name": "Nodejs",
+      "credit": 12,
+      "category": "Cơ sở",
+      "teacher": "chinhpd5",
+      "id": 7
     }
   ]
 }
